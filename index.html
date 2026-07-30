@@ -15,6 +15,15 @@
         background: #efa4f0;
         color: #fff;
         font-family: Arial, sans-serif;
+        position: relative; /* Needed to anchor absolute positions */
+        overflow: hidden;   /* Keeps edge images from creating scrollbars */
+    }
+
+    /* Group timer and rac2 together side-by-side */
+    .timer-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 30px; /* Space between timer and rac2 */
     }
 
     #timer {
@@ -22,14 +31,51 @@
         font-weight: bold;
         text-align: center;
     }
+
+    /* Image 1: Faint at bottom left */
+    .rac1 {
+        position: absolute;
+        bottom: 25px;
+        left: 25px;
+        width: 140px;      /* Adjust size if needed */
+        opacity: 0.5;     /* Makes it faint (35% visible) */
+        pointer-events: none;
+    }
+
+    /* Image 2: Right of the timer */
+    .rac2 {
+        width: 100px;      /* Adjust size if needed */
+        height: auto;
+        opacity: 0.5;
+    }
+
+    /* Image 3: Top screen near left/middle */
+    .rac3 {
+        position: absolute;
+        top: 20px;
+        left: 25%;         /* Positioned between left (0%) and center (50%) */
+        width: 120px;
+        opacity: 0.5;
+        /* Adjust size if needed */
+        pointer-events: none;
+    }
 </style>
 </head>
 <body>
 
-<div id="timer">Loading...</div>
+<!-- Top left/middle image -->
+<img src="rac3.png" alt="rac3" class="rac3">
+
+<!-- Centered timer with rac2 to its right -->
+<div class="timer-wrapper">
+    <div id="timer">Loading...</div>
+    <img src="rac2.png" alt="rac2" class="rac2">
+</div>
+
+<!-- Faint bottom-left image -->
+<img src="rac1.png" alt="rac1" class="rac1">
 
 <script>
-    
     const endTime = new Date("2026-08-16T20:00:00Z").getTime();
 
     function updateTimer() {
