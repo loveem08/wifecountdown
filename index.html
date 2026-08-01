@@ -19,17 +19,26 @@
         overflow: hidden;   /* Keeps edge images from creating scrollbars */
     }
 
-    /* Group timer and rac2 together side-by-side */
+    /* The wrapper is now perfectly centered because rac2 is taken out of the layout flow */
     .timer-wrapper {
+        position: relative;
         display: flex;
+        flex-direction: column; /* Stacks timer and percentage */
         align-items: center;
-        gap: 30px; /* Space between timer and rac2 */
     }
 
     #timer {
         font-size: 4rem;
         font-weight: bold;
         text-align: center;
+        font-variant-numeric: tabular-nums; /* Keeps numbers from wiggling horizontally */
+    }
+
+    #percentage {
+        font-size: 1.5rem;
+        margin-top: 5px;
+        opacity: 0.9;
+        font-family: monospace; /* Monospace keeps the 8 decimal places stable */
     }
 
     /* Image 1: Faint at bottom left */
@@ -37,14 +46,19 @@
         position: absolute;
         bottom: 25px;
         left: 25px;
-        width: 560px;      /* Adjust size if needed */
-        opacity: 0.5;     /* Makes it faint (35% visible) */
+        width: 560px;
+        opacity: 0.5;
         pointer-events: none;
     }
 
-    /* Image 2: Right of the timer */
+    /* Image 2: Anchored absolutely to the right of the timer */
     .rac2 {
-        width: 256px;      /* Adjust size if needed */
+        position: absolute;
+        left: 100%; /* Pushes it exactly outside the right edge of the timer */
+        margin-left: 30px; /* Space between timer and rac2 */
+        top: 50%;
+        transform: translateY(-50%); /* Centers it vertically alongside the text */
+        width: 256px;
         height: auto;
         opacity: 0.5;
     }
@@ -53,10 +67,9 @@
     .rac3 {
         position: absolute;
         top: 20px;
-        left: 25%;         /* Positioned between left (0%) and center (50%) */
+        left: 25%;
         width: 480px;
         opacity: 0.5;
-        /* Adjust size if needed */
         pointer-events: none;
     }
 </style>
@@ -69,6 +82,7 @@
 <!-- Centered timer with rac2 to its right -->
 <div class="timer-wrapper">
     <div id="timer">Loading...</div>
+    <div id="percentage">0.00000000%</div>
     <img src="rac2.png" alt="rac2" class="rac2">
 </div>
 
@@ -76,19 +90,27 @@
 <img src="rac1.png" alt="rac1" class="rac1">
 
 <script>
+    // Set your target end date
     const endTime = new Date("2026-08-16T20:00:00Z").getTime();
+    
+    // Set a start date to calculate the percentage from. 
+    // CHANGE THIS to the exact date/time you started the countdown!
+    // Right now it's set to January 1, 2026 as a placeholder.
+    const startTime = new Date("2026-01-01T00:00:00Z").getTime(); 
 
     function updateTimer() {
         const now = Date.now();
         let diff = endTime - now;
 
+        // If the countdown is over
         if (diff <= 0) {
             document.getElementById("timer").textContent = "000:00:00";
+            document.getElementById("percentage").textContent = "100.00000000%";
             return;
         }
 
+        // --- Time Math ---
         const totalSeconds = Math.floor(diff / 1000);
-
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = totalSeconds % 60;
@@ -97,10 +119,24 @@
             String(hours).padStart(3, "0") + ":" +
             String(minutes).padStart(2, "0") + ":" +
             String(seconds).padStart(2, "0");
+
+        // --- Percentage Math ---
+        const totalDuration = endTime - startTime;
+        const elapsed = now - startTime;
+        let percent = (elapsed / totalDuration) * 100;
+
+        // Cap the percentage so it doesn't drop below 0 if you view it before the start date
+        if (percent < 0) percent = 0;
+        if (percent > 100) percent = 100;
+
+        // .toFixed(8) forces exactly 8 decimal places
+        document.getElementById("percentage").textContent = percent.toFixed(8) + "%";
     }
 
     updateTimer();
-    setInterval(updateTimer, 1000);
+    
+    // Run every 50 milliseconds instead of 1000 so the 8 decimals look super smooth!
+    setInterval(updateTimer, 50);
 </script>
 
 </body>
